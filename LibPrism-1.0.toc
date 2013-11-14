@@ -1,0 +1,9 @@
+## Interface: 50400
+## Title: Lib: Prism-1.0
+## Notes: Color manipulation library.
+## Author: Aiue
+## Version @project-version@
+
+Libs\LibStub\LibStub.lua
+
+lib.xml
