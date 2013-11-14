@@ -23,7 +23,7 @@ local abs,max,min = math.abs, math.max, math.min
 local format = string.format
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :HexAngleGradient(minColor, maxColor, modifier)
+-- :GetAngleGradient(minColor, maxColor, modifier)
 -- 
 -- - minColor - table or string
 --              if table, format is expected to be {r = i, g = i, b = i}
@@ -130,7 +130,8 @@ function Prism:RGBtoHSV(r, g, b)
    local min,max = min(r,g,b),max(r,g,b)
    local h,s,v = 0,0,max-min
 
-   if max == r then h = ((g-b)/v)%6
+   if v == 0 then h = 0 --Division not defined when denominator is 0.
+   elseif max == r then h = ((g-b)/v)%6
    elseif max == g then h = ((b-r)/v)+2
    elseif max == b then h = ((r-g)/v)+4 end
    h = h*60
