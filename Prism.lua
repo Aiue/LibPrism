@@ -1,3 +1,8 @@
+--- LibPrism-1.0 provides some tools to manipulate colors.
+-- @class file
+-- @name LibPrism-1.0
+-- @release $Id: LibPrism-1.0 @project-version@ @file-date-iso@ @file-author@ $
+
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- LibPrism-1.0
 -- A library built to manipulate colors.
@@ -36,7 +41,7 @@ local format = string.format
 -- @param maxColor The color found at your ending point.
 -- @param modifier Percentage describing how far the point the desired color is from the two end points.
 -- @usage
--- Call the minColor and maxColor arguments with either a table containing rgb values, formatted as {r = v, g = v, b = v} where c describes the color and {v ∈ ℝ: 0 ≤ v ≤ 1}, or as a string containing a hexadecimal representation of the rgb values, formatted as rrggbb.
+-- Call the minColor and maxColor arguments with either a table containing rgb values, formatted as {r = v, g = v, b = v} where c describes the color and {c ∈ ℝ: 0 ≤ c ≤ 1}, or as a string containing a hexadecimal representation of the rgb values, formatted as rrggbb. The modifier is expected to also adhere to the same range, but will default to 0 if m < 0 or 1 if m > 1.
 --
 -- @return Hexadecimal string, [00,ff][00,ff][00,ff]
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
@@ -50,8 +55,8 @@ function Prism:GetAngleGradient(minColor, maxColor, modifier)
 
    if not minColor or not maxColor or not modifier then
       error("Usage: Prism:GetAngleGradient(minColor, maxColor, modifier)", 2)
-   elseif type(modifier) ~= "number" or modifier < 0 or modifier > 1 then
-      msg = "modifier expected to be a number, where 0 < modifier < 1"
+   elseif type(modifier) ~= "number" then -- or modifier < 0 or modifier > 1 then
+      msg = "modifier expected to be a number"
    else
       for _,v in ipairs({minColor, maxColor}) do
 	 if type(v) == "table" and (not v.r or v.r < 0 or v.r > 1 or not v.g or v.g < 0 or v.g > 1 or not v.b or v.b < 0 or v.b > 1) then
@@ -68,6 +73,9 @@ function Prism:GetAngleGradient(minColor, maxColor, modifier)
 	 end
       end
    end
+
+   -- better to use this for modifier numbers outside the range, actually..
+   if modifier < 0 then modifier = 0 elseif modifier > 1 then modifier = 1 end
 
    if msg then error(("Usage: Prism:GetAngleGradient(minColor, maxColor, modifier): %s").format(msg), 2) end
 
