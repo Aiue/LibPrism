@@ -12,7 +12,7 @@
 -- Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 
-local MAJOR, MINOR = "LibPrism-1.0", 1
+local MAJOR, MINOR = "LibPrism-1.0", 2
 local Prism = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not Prism then return end
@@ -36,13 +36,13 @@ local format = string.format
 -- - modifier - the modifier to apply, element of R, [0,1]
 
 --- Get the angle gradient between two colors.
--- @paramsig minColor, maxColor, modifier
--- @param minColor The color found at your starting point.
--- @param maxColor The color found at your ending point.
--- @param modifier Percentage describing how far the point the desired color is from the two end points.
--- @usage
 -- Call the minColor and maxColor arguments with either a table containing rgb values, formatted as {r = v, g = v, b = v} where c describes the color and {c ∈ ℝ: 0 ≤ c ≤ 1}, or as a string containing a hexadecimal representation of the rgb values, formatted as rrggbb. The modifier is expected to also adhere to the same range, but will default to 0 if m < 0 or 1 if m > 1.
---
+-- @paramsig mincolor, maxcolor, modifier
+-- @param minColor The color found at your starting point. Should be a table or a string, the table format is expected to be {r = cr, g = cg, b = cb} where {c ∈ ℝ: 0 ≤ c ≤ 1}, and the string format is expected to be a six-digit hexadecimal represantion of the color according to rgb where r,g,b = [00,FF].
+-- @param maxColor The color found at your ending point. Should be a table or a string, the table format is expected to be {r = cr, g = cg, b = cb} where {c ∈ ℝ: 0 ≤ c ≤ 1}, and the string format is expected to be a six-digit hexadecimal represantion of the color according to rgb where r,g,b = [00,FF].
+-- @param modifier Percentage describing how far the point the desired color is from the two end points, {m ∈ ℝ: 0 ≤ m ≤ 1} is expected, but if m < 0 it will default to 0, and if m > 1 it will default to 1.
+-- @usage Prism:GetAngleGradient({r = 1, g = 0, b = 0}, {r = 0, g = 1, b = 0}, .5) would return the values "ffff00", 1, 1, 0
+-- @usage Prism:GetAngleGradient("00ffff", {r = 1, g = 1, b = 0}, .25) would return the values "00ff7f", 0, 1, 0.5
 -- @return Hexadecimal string, [00,ff][00,ff][00,ff]
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
@@ -115,13 +115,12 @@ end
 -- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
 
 --- Converts a color from RGB to HSV.
+-- Returns the HSV values corresponding to the input RGB color.
 -- @paramsig r, g, b
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage
--- Returns the HSV values corresponding to the input RGB color.
---
+-- @usage Prism:RGBtoHSV(0, 1, 0) would return the values 120, 1, 1
 -- @return The h value, where {h ∈ ℝ: 0 ≤ h ≤ 360}
 -- @return The s value, where {s ∈ ℝ: 0 ≤ s ≤ 1}
 -- @return The v value, where {v ∈ ℝ: 0 ≤ v ≤ 1}
@@ -148,13 +147,12 @@ end
 -- - v - value, {v ∈ ℝ: 0 ≤ v ≤ 1}
 
 --- Converts a color from HSV to RGB.
+-- Returns the RGB values corresponding to the input HSV color.
 -- @paramsig h, s, v
 -- @param h The hue, {h ∈ ℝ: 0 ≤ h ≤ 360}
 -- @param s The saturation, {s ∈ ℝ: 0 ≤ s ≤ 1}
 -- @param v The brightness value, {v ∈ ℝ: 0 ≤ v ≤ 1}
--- @usage
--- Returns the RGB values corresponding to the input HSV color.
---
+-- @usage Prism:HSVtoRGB(90, 1, 1) would return 0.5, 1, 0
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
