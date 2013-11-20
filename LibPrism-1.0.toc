@@ -2,10 +2,7 @@
 ## Title: Lib: Prism-1.0
 ## Notes: Color manipulation library.
 ## Author: Aiue
-#@debug@
-# Version: @project-version@
-## Version: dev
-#@end-debug@
+## Version: @project-version@
 
 Libs\LibStub\LibStub.lua
 
