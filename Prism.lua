@@ -13,8 +13,12 @@
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 
 local MAJOR = "LibPrism-1.0"
+--[===[@non-debug@
 local MINOR = --@project-date-integer@
-if not MINOR then MINOR = 3
+   --@end-non-debug@]===]
+--@debug@
+MINOR = math.huge
+--@end-debug@
 
 local Prism = LibStub:NewLibrary(MAJOR, MINOR)
 
@@ -54,13 +58,13 @@ local ipairs = ipairs
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
 
-function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, minB, maxB, modifier)
+function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier)
    local msg = nil
    local hMin, hMax, sMin, sMax, vMin, vMax
    local h, s, v, r, g, b
 
    -- Check if the call is valid.
-   if not rMin or not rMax or or not gMin or not gMax or not bMin or not bMax or not modifier then
+   if not rMin or not rMax or not gMin or not gMax or not bMin or not bMax or not modifier then
       error("Usage: Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier)", 2)
    elseif type(modifier) ~= "number" then
       msg = "modifier expected to be a number"
@@ -70,7 +74,7 @@ function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, minB, maxB, modifier)
 	    msg = string.format("expected a number, got %s", type(v))
 	    break
 
-	 elseif v < 0 or v > then
+	 elseif v < 0 or v > 1 then
 	    msg = "numbers expected to be within [0,1]"
 	    break
 
@@ -122,7 +126,7 @@ function Prism:RGBtoHSV(r, g, b)
       msg = "numbers expected to be within [0,1]"
    end
 
-   if msg then error(("Usage: Prism:RGBtoHSV(r, g, b): %s".format(msg),2) end
+   if msg then error(("Usage: Prism:RGBtoHSV(r, g, b): %s").format(msg),2) end
 
    local min,max = min(r,g,b),max(r,g,b)
    local h,s,v = 0,0,max-min
@@ -164,11 +168,11 @@ function Prism:HSVtoRGB(h, s, v)
    elseif type(h) ~= "number" or type(s) ~= "number" or type(v) ~= "number" then
       msg = "HSV values expected to be numbers."
 
-   elseif h < 0 or h > 1 or s < 0 or s > 1 or v < 0 or v > 1 then
+   elseif s < 0 or s > 1 or v < 0 or v > 1 then -- skipping h for now, since at any value it can be thought of as h%360 anyway.
       msg = "numbers expected to be within [0,1]"
    end
 
-   if msg then error(("Usage: Prism:HSVtoRGB(h, s, v): %s".format(msg),2) end
+   if msg then error(("Usage: Prism:HSVtoRGB(h, s, v): %s").format(msg),2) end
 
    local r,g,b
    h = (h%360) / 60
