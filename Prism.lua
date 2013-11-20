@@ -21,87 +21,68 @@ if not Prism then return end
 local error,tonumber = error,tonumber
 local abs,max,min = math.abs, math.max, math.min
 local format = string.format
+local ipairs = ipairs
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :GetAngleGradient(minColor, maxColor, modifier)
 -- 
--- - minColor - table or string
---              if table, format is expected to be {r = i, g = i, b = i}
---                where i is a real number and 0<=i<=1
---              if string, a six-digit hexadecimal representation is expected
--- - maxColor - table or string
---              if table, format is expected to be {r = i, g = i, b = i}
---                where i is a real number and 0<=i<=1
---              if string, a six-digit hexadecimal representation is expected
--- - modifier - the modifier to apply, element of R, [0,1]
+-- - rMin - Red color at the lowest point. {rMin ∈ ℝ: 0 ≤ rMin ≤ 1}
+-- - rMax - Red color at the lowest point. {rMax ∈ ℝ: 0 ≤ rMax ≤ 1}
+-- - gMin - Red color at the lowest point. {gMin ∈ ℝ: 0 ≤ gMin ≤ 1}
+-- - gMax - Red color at the lowest point. {gMax ∈ ℝ: 0 ≤ gMax ≤ 1}
+-- - bMin - Red color at the lowest point. {bMin ∈ ℝ: 0 ≤ bMin ≤ 1}
+-- - bMax - Red color at the lowest point. {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
+-- - modifier - the modifier to apply, {m ∈ ℝ: 0 ≤ m ≤ 1}
 
 --- Get the angle gradient between two colors.
--- Call the minColor and maxColor arguments with either a table containing rgb values, formatted as {r = v, g = v, b = v} where c describes the color and {c ∈ ℝ: 0 ≤ c ≤ 1}, or as a string containing a hexadecimal representation of the rgb values, formatted as rrggbb. The modifier is expected to also adhere to the same range, but will default to 0 if m < 0 or 1 if m > 1.
--- @paramsig mincolor, maxcolor, modifier
--- @param minColor The color found at your starting point. Should be a table or a string, the table format is expected to be {r = cr, g = cg, b = cb} where {c ∈ ℝ: 0 ≤ c ≤ 1}, and the string format is expected to be a six-digit hexadecimal represantion of the color according to rgb where r,g,b = [00,FF].
--- @param maxColor The color found at your ending point. Should be a table or a string, the table format is expected to be {r = cr, g = cg, b = cb} where {c ∈ ℝ: 0 ≤ c ≤ 1}, and the string format is expected to be a six-digit hexadecimal represantion of the color according to rgb where r,g,b = [00,FF].
+-- Call with 2*rgb values for the colors at your starting and ending points respectively, alongside the modifier value that denotes relative distance between two points. Gives you back the angle gradient as a hexadecimal string and raw color values. Anything except the hexadecimal string is expected to fall within the [0,1] range, with numbers as real as lua can handle.
+-- @paramsig rMin, rMax, gMin, gMax, bMin, bMax, modifier
+-- @param rMin The red color value at your starting point, {rMin ∈ ℝ: 0 ≤ rMin ≤ 1}
+-- @param rMin The red color value at your ending point, {rMax ∈ ℝ: 0 ≤ rMax ≤ 1}
+-- @param rMin The green color value at your starting point, {gMin ∈ ℝ: 0 ≤ gMin ≤ 1}
+-- @param rMin The green color value at your ending point, {gMax ∈ ℝ: 0 ≤ gMax ≤ 1}
+-- @param rMin The blue color value at your starting point, {bMin ∈ ℝ: 0 ≤ bMin ≤ 1}
+-- @param rMin The blue color value at your ending point, {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
 -- @param modifier Percentage describing how far the point the desired color is from the two end points, {m ∈ ℝ: 0 ≤ m ≤ 1} is expected, but if m < 0 it will default to 0, and if m > 1 it will default to 1.
--- @usage Prism:GetAngleGradient({r = 1, g = 0, b = 0}, {r = 0, g = 1, b = 0}, .5) would return the values "ffff00", 1, 1, 0
--- @usage Prism:GetAngleGradient("00ffff", {r = 1, g = 1, b = 0}, .25) would return the values "00ff7f", 0, 1, 0.5
+-- @usage Prism:GetAngleGradient(1, 0, 0, 1, 0, 0}, .5) would return the values "ffff00", 1, 1, 0
+-- @usage Prism:GetAngleGradient(0, 1, 1, 1, 1, 0, .25) would return the values "00ff7f", 0, 1, 0.5
 -- @return Hexadecimal string, [00,ff][00,ff][00,ff]
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
 
-function Prism:GetAngleGradient(minColor, maxColor, modifier)
+function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, minB, maxB, modifier)
    local msg = nil
-   local min,max = {}, {}
-   local r,g,b,h,s,v
+   local hMin, hMax, sMin, sMax, vMin, vMax
+   local h, s, v, r, g, b
 
-   if not minColor or not maxColor or not modifier then
-      error("Usage: Prism:GetAngleGradient(minColor, maxColor, modifier)", 2)
-   elseif type(modifier) ~= "number" then -- or modifier < 0 or modifier > 1 then
+   -- Check if the call is valid.
+   if not rMin or not rMax or or not gMin or not gMax or not bMin or not bMax or not modifier then
+      error("Usage: Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier)", 2)
+   elseif type(modifier) ~= "number" then
       msg = "modifier expected to be a number"
    else
-      for _,v in ipairs({minColor, maxColor}) do
-	 if type(v) == "table" and (not v.r or v.r < 0 or v.r > 1 or not v.g or v.g < 0 or v.g > 1 or not v.b or v.b < 0 or v.b > 1) then
-	    msg = "table format expected to be {r = 0 <= v <= 1, g = 0 <= v <= 1, b = 0 <= v <= 1}"
+      for _,v in ipairs({rMin, rMax, gMin, gMax, bMin, bMax, modifier}) do
+	 if type(v) ~= "number" then
+	    msg = string.format("expected a number, got %s", type(v))
 	    break
 
-	 elseif type(v) == "string" and not string.match(v, '^%x+$') and #string ~= 6 then
-	    msg = "string format expected to be 'rrggbb', where rrggbb represents a hexadecimal representation of the color"
+	 elseif v < 0 or v > then
+	    msg = "number expected to be within [0,1]"
 	    break
 
- 	 elseif type(v) ~= "table" and type(v) ~= "string" then
-	    msg = format("%s expected to be a string or table, not '%s'", v == 1 and "minColor" or "maxColor", type(minColor))
-	    break
 	 end
       end
    end
 
+   if msg then error(("Usage: Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier): %s").format(msg), 2) end
+
    -- better to use this for modifier numbers outside the range, actually..
    if modifier < 0 then modifier = 0 elseif modifier > 1 then modifier = 1 end
 
-   if msg then error(("Usage: Prism:GetAngleGradient(minColor, maxColor, modifier): %s").format(msg), 2) end
-
-   if type(minColor) == "table" then
-      min = minColor
-   else
-      min = {
-	 r = tonumber("0x" .. string.sub(minColor, 1, 2)) / 255,
-	 g = tonumber("0x" .. string.sub(minColor, 3, 4)) / 255,
-	 b = tonumber("0x" .. string.sub(minColor, 5, 6)) / 255,
-      }
-   end
-
-   if type(maxColor) == "table" then
-      max = maxColor
-   else
-      max = {
-	 r = tonumber("0x" .. string.sub(maxColor, 1, 2)) / 255,
-	 g = tonumber("0x" .. string.sub(maxColor, 3, 4)) / 255,
-	 b = tonumber("0x" .. string.sub(maxColor, 5, 6)) / 255,
-      }
-   end
-
-   min.h,min.s,min.v = self:RGBtoHSV(min.r, min.g, min.b)
-   max.h,max.s,max.v = self:RGBtoHSV(max.r, max.g, max.b)
-   h,s,v = min.h + ((max.h - min.h)*modifier)%360, min.s + (max.s - min.s)*modifier, min.v + (max.v - min.v)*modifier
+   hMin,sMin,vMin = self:RGBtoHSV(rMin, gMin, bMin)
+   hMax,sMax,vMax = self:RGBtoHSV(rMax, gMax, bMax)
+   h,s,v = hMin + ((hMax - hMin)*modifier)%360, sMin + (sMax - sMin)*modifier, vMin + (vMax - vMin)*modifier
    r,g,b = self:HSVtoRGB(h,s,v)
 
    return format('%02x%02x%02x', r*255, g*255, b*255), r, g, b
