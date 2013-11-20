@@ -12,7 +12,7 @@
 -- Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 
-local MAJOR, MINOR = "LibPrism-1.0", 2
+local MAJOR, MINOR = "LibPrism-1.0", @project-timestamp@
 local Prism = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not Prism then return end
@@ -68,7 +68,7 @@ function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, minB, maxB, modifier)
 	    break
 
 	 elseif v < 0 or v > then
-	    msg = "number expected to be within [0,1]"
+	    msg = "numbers expected to be within [0,1]"
 	    break
 
 	 end
@@ -107,6 +107,20 @@ end
 -- @return The v value, where {v ∈ ℝ: 0 ≤ v ≤ 1}
 
 function Prism:RGBtoHSV(r, g, b)
+   local msg = nil
+
+   if not r or not g or not b then
+      error("Usage: Prism:RGBtoHSV(r, g, b)", 2)
+
+   elseif type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" then
+      msg = "RGB values expected to be numbers."
+
+   elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 then
+      msg = "numbers expected to be within [0,1]"
+   end
+
+   if msg then error(("Usage: Prism:RGBtoHSV(r, g, b): %s".format(msg),2) end
+
    local min,max = min(r,g,b),max(r,g,b)
    local h,s,v = 0,0,max-min
 
@@ -139,6 +153,20 @@ end
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
 
 function Prism:HSVtoRGB(h, s, v)
+   local msg = nil
+
+   if not h or not s or not v then
+      error("Usage: Prism:HSVtoRGB(h, s, v)", 2)
+
+   elseif type(h) ~= "number" or type(s) ~= "number" or type(v) ~= "number" then
+      msg = "HSV values expected to be numbers."
+
+   elseif h < 0 or h > 1 or s < 0 or s > 1 or v < 0 or v > 1 then
+      msg = "numbers expected to be within [0,1]"
+   end
+
+   if msg then error(("Usage: Prism:HSVtoRGB(h, s, v): %s".format(msg),2) end
+
    local r,g,b
    h = (h%360) / 60
    local c = v*s
