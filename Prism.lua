@@ -17,7 +17,7 @@ local MAJOR = "LibPrism-1.0"
 local MINOR = --@project-date-integer@
    --@end-non-debug@]===]
 --@debug@
-MINOR = math.huge
+MINOR = 11e11
 --@end-debug@
 
 local Prism = LibStub:NewLibrary(MAJOR, MINOR)
