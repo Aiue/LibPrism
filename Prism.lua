@@ -69,7 +69,7 @@ function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier)
    elseif type(modifier) ~= "number" then
       msg = "modifier expected to be a number"
    else
-      for _,v in ipairs({rMin, rMax, gMin, gMax, bMin, bMax, modifier}) do
+      for _,v in ipairs({rMin, rMax, gMin, gMax, bMin, bMax}) do
 	 if type(v) ~= "number" then
 	    msg = string.format("expected a number, got %s", type(v))
 	    break
@@ -126,7 +126,7 @@ function Prism:RGBtoHSV(r, g, b)
       msg = "numbers expected to be within [0,1]"
    end
 
-   if msg then error(("Usage: Prism:RGBtoHSV(r, g, b): %s").format(msg),2) end
+   if msg then error(("Usage: Prism:RGBtoHSV(r, g, b): %s").format(msg),1) end
 
    local min,max = min(r,g,b),max(r,g,b)
    local h,s,v = 0,0,max-min
@@ -172,7 +172,7 @@ function Prism:HSVtoRGB(h, s, v)
       msg = "numbers expected to be within [0,1]"
    end
 
-   if msg then error(("Usage: Prism:HSVtoRGB(h, s, v): %s").format(msg),2) end
+   if msg then error(("Usage: Prism:HSVtoRGB(h, s, v): %s").format(msg),1) end
 
    local r,g,b
    h = (h%360) / 60
