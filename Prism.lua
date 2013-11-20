@@ -12,7 +12,10 @@
 -- Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 
-local MAJOR, MINOR = "LibPrism-1.0", @project-timestamp@
+local MAJOR = "LibPrism-1.0"
+local MINOR = --@project-date-integer@
+if not MINOR then MINOR = 3
+
 local Prism = LibStub:NewLibrary(MAJOR, MINOR)
 
 if not Prism then return end
@@ -38,11 +41,11 @@ local ipairs = ipairs
 -- Call with 2*rgb values for the colors at your starting and ending points respectively, alongside the modifier value that denotes relative distance between two points. Gives you back the angle gradient as a hexadecimal string and raw color values. Anything except the hexadecimal string is expected to fall within the [0,1] range, with numbers as real as lua can handle.
 -- @paramsig rMin, rMax, gMin, gMax, bMin, bMax, modifier
 -- @param rMin The red color value at your starting point, {rMin ∈ ℝ: 0 ≤ rMin ≤ 1}
--- @param rMin The red color value at your ending point, {rMax ∈ ℝ: 0 ≤ rMax ≤ 1}
--- @param rMin The green color value at your starting point, {gMin ∈ ℝ: 0 ≤ gMin ≤ 1}
--- @param rMin The green color value at your ending point, {gMax ∈ ℝ: 0 ≤ gMax ≤ 1}
--- @param rMin The blue color value at your starting point, {bMin ∈ ℝ: 0 ≤ bMin ≤ 1}
--- @param rMin The blue color value at your ending point, {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
+-- @param rMax The red color value at your ending point, {rMax ∈ ℝ: 0 ≤ rMax ≤ 1}
+-- @param gMin The green color value at your starting point, {gMin ∈ ℝ: 0 ≤ gMin ≤ 1}
+-- @param gMax The green color value at your ending point, {gMax ∈ ℝ: 0 ≤ gMax ≤ 1}
+-- @param bMin The blue color value at your starting point, {bMin ∈ ℝ: 0 ≤ bMin ≤ 1}
+-- @param bMaxThe blue color value at your ending point, {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
 -- @param modifier Percentage describing how far the point the desired color is from the two end points, {m ∈ ℝ: 0 ≤ m ≤ 1} is expected, but if m < 0 it will default to 0, and if m > 1 it will default to 1.
 -- @usage Prism:GetAngleGradient(1, 0, 0, 1, 0, 0}, .5) would return the values "ffff00", 1, 1, 0
 -- @usage Prism:GetAngleGradient(0, 1, 1, 1, 1, 0, .25) would return the values "00ff7f", 0, 1, 0.5
