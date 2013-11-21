@@ -50,7 +50,7 @@ local ipairs = ipairs
 -- @param gMax The green color value at your ending point, {gMax ∈ ℝ: 0 ≤ gMax ≤ 1}
 -- @param bMin The blue color value at your starting point, {bMin ∈ ℝ: 0 ≤ bMin ≤ 1}
 -- @param bMaxThe blue color value at your ending point, {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
--- @param modifier Percentage describing how far the point the desired color is from the two end points, {m ∈ ℝ: 0 ≤ m ≤ 1} is expected, but if m < 0 it will default to 0, and if m > 1 it will default to 1.
+-- @param modifier Percentage describing how far the point the desired color is from the two end points, {m ∈ ℝ: 0 ≤ m ≤ 1} is expected, but if m < 0 it will default to 0, and if m > 1 it will default to 1. For convenience, 0/0 will be defined as 0 for the purposes of this function.
 -- @usage Prism:GetAngleGradient(1, 0, 0, 1, 0, 0}, .5) would return the values "ffff00", 1, 1, 0
 -- @usage Prism:GetAngleGradient(0, 1, 1, 1, 1, 0, .25) would return the values "00ff7f", 0, 1, 0.5
 -- @return Hexadecimal string, [00,ff][00,ff][00,ff]
@@ -85,7 +85,7 @@ function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier)
    if msg then error(("Usage: Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier): %s").format(msg), 2) end
 
    -- better to use this for modifier numbers outside the range, actually..
-   if modifier < 0 then modifier = 0 elseif modifier > 1 then modifier = 1 end
+   if modifier < 0 then modifier = 0 elseif modifier > 1 then modifier = 1 elseif modifier == 0/0 then modifier = 0 end
 
    hMin,sMin,vMin = self:RGBtoHSV(rMin, gMin, bMin)
    hMax,sMax,vMax = self:RGBtoHSV(rMax, gMax, bMax)
