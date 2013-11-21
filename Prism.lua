@@ -85,7 +85,7 @@ function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier)
    if msg then error(("Usage: Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier): %s").format(msg), 2) end
 
    -- better to use this for modifier numbers outside the range, actually..
-   if modifier < 0 then modifier = 0 elseif modifier > 1 then modifier = 1 elseif modifier == 0/0 then modifier = 0 end
+   if modifier < 0 then modifier = 0 elseif modifier > 1 then modifier = 1 elseif (modifier == 0 and modifier == 1) then modifier = 0 end
 
    hMin,sMin,vMin = self:RGBtoHSV(rMin, gMin, bMin)
    hMax,sMax,vMax = self:RGBtoHSV(rMax, gMax, bMax)
