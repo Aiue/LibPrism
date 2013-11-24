@@ -129,12 +129,12 @@ function Prism:RGBtoHSV(r, g, b)
    if msg then error(("Usage: Prism:RGBtoHSV(r, g, b): %s").format(msg),2) end
 
    local min,max = min(r,g,b),max(r,g,b)
-   local h,s,v = 0,0,max-min
+   local h,s,v = 0,0,max
 
-   if v == 0 then h = 0 --Division not defined when denominator is 0.
-   elseif max == r then h = ((g-b)/v)%6
-   elseif max == g then h = ((b-r)/v)+2
-   elseif max == b then h = ((r-g)/v)+4 end
+   if max == min then h = 0 --Division not defined when denominator is 0.
+   elseif max == r then h = ((g-b)/(max-min))%6
+   elseif max == g then h = ((b-r)/(max-min))+2
+   elseif max == b then h = ((r-g)/(max-min))+4 end
    h = h*60
    s = v/max
 
@@ -206,7 +206,7 @@ end
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:Saturate(.5, .5, .5, .5) would return the values 
+-- @usage Prism:Saturate(.1, .2, .3, .4) would return the values 0, 0.15, 0.3
 
 function Prism:Saturate(r, g, b, d)
    local msg = nil
@@ -247,7 +247,7 @@ end
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:Desaturate(.5, .5, .5, .5) would return the values 
+-- @usage Prism:Desaturate(.1, .2, .3, .4) would return the values 0.12, 0.21, 0.3
 
 function Prism:Desaturate(r, g, b, d)
    return self:Saturate(r, g, b, -d)
@@ -270,7 +270,7 @@ end
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:Lighten(.5, .5, .5, .5) would return the values 
+-- @usage Prism:Lighten(.1, .2, .3, .4) would return the values 0, 0.35, 0.7
 
 function Prism:Lighten(r, g, b, d)
    local msg = nil
@@ -311,7 +311,7 @@ end
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:Darken(.5, .5, .5, .5) would return the values 
+-- @usage Prism:Darken(.4, .3, .2, .1) would return the values 0.3, 0.15, 0
 
 function Prism:Darken(r, g, b, d)
    return self:Lighten(r, g, b, -d)
