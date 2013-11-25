@@ -87,7 +87,7 @@ function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier)
       end
    end
 
-   if msg then error(("Usage: Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier): %s").format(msg), 2) end
+   if msg then error(string.format("Usage: Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, modifier): %s", msg), 2) end
 
    -- better to use this for modifier numbers outside the range, actually..
    if modifier < 0 then modifier = 0 elseif modifier > 1 then modifier = 1 elseif (modifier == 0 and modifier == 1) then modifier = 0 end
@@ -131,7 +131,7 @@ function Prism:RGBtoHSV(r, g, b)
       msg = "numbers expected to be within [0,1]"
    end
 
-   if msg then error(("Usage: Prism:RGBtoHSV(r, g, b): %s").format(msg),2) end
+   if msg then error(string.format("Usage: Prism:RGBtoHSV(r, g, b): %s", msg),2) end
 
    local min,max = min(r,g,b),max(r,g,b)
    local h,s,v = 0,0,max
@@ -177,7 +177,7 @@ function Prism:HSVtoRGB(h, s, v)
       msg = "numbers expected to be within [0,1]"
    end
 
-   if msg then error(("Usage: Prism:HSVtoRGB(h, s, v): %s").format(msg),2) end
+   if msg then error(string.format("Usage: Prism:HSVtoRGB(h, s, v): %s", msg),2) end
 
    local r,g,b
    h = (h%360) / 60
@@ -195,32 +195,40 @@ function Prism:HSVtoRGB(h, s, v)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :Saturate(r, g, b, m)
+-- :Saturate(r, g, b, m, operation)
 --
 -- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
--- - type - What type of operation to perform, can be "add" for additive, "div" for divisive and "multi" for multiplicative.
+-- - operation - What type of operation to perform, can be "add" for additive or "multi" for multiplicative.
 
 --- Increases the saturation of a color.
 -- Returns the saturated color value.
--- @paramsig r, g, b, d
+-- @paramsig r, g, b, m
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- @param m By how much the saturation should be increased, {m ∈ ℝ: -1 ≤ m ≤ 1}
--- @param type Which type of operation to perform. "add" for additive, "div" for divisive or "multi" for multiplicative.
+-- @param operation Which type of operation to perform. "add" for additive or "multi" for multiplicative. Defaults to additive.
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:Saturate(.1, .2, .3, .4) would return the values 0, 0.15, 0.3
+-- @usage Prism:Saturate(.1, .2, .3, .4, "add") would return the values 0, 0.15, 0.3
+-- @usage Prism:Saturate(.1, .2, .3, .4, "multi") would return the values 0.02, 0.16, 0.3
 
-function Prism:Saturate(r, g, b, m)
+function Prism:Saturate(r, g, b, m, operation)
    local msg = nil
+   if not operation then operation = TYPE_ADD
+   else
+      operation = string.lower(operation)
+      if string.match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
+      elseif string.match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
+      else msg = string.format("unknown operation type: %s", operation) end
+   end
 
    if not r or not g or not b or not m then
-      error("Usage: Prism:Saturate(r, g, b, m)", 2)
+      error("Usage: Prism:Saturate(r, g, b, m, operation)", 2)
 
    elseif type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" or type(m) ~= "number" then
       msg = "number expected"
@@ -228,10 +236,20 @@ function Prism:Saturate(r, g, b, m)
    elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 then
       msg = "color values expected to be within [0,1]"
 
-   if msg then error(("Usage: Prism:Saturate(r, g, b, m): %s").format(msg),2) end
+   elseif operation == TYPE_ADD and (m < -1 or m > 1) then
+      msg = "additive operation modifier expected to be within [-1,1]"
+   end
+
+   if msg then error(string.format("Usage: Prism:Saturate(r, g, b, m, operation): %s", msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
-   s = s+m
+   if operation == TYPE_MULTI then
+      -- Have to take special care of negative values here.
+      if m < -1 then m = 0 elseif m < 0 then m = 1-(math.abs(m)) else m = 1+m end
+      s = s*m
+   else
+      s = s+m
+   end
 
    if s < 0 then s = 0 elseif s > 1 then s = 1 end
 
@@ -239,11 +257,13 @@ function Prism:Saturate(r, g, b, m)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :Desaturate(r, g, b, m)
+-- :Desaturate(r, g, b, operation)
 --
 -- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - operation - What type of operation to perform, can be "add" for additive or "multi" for multiplicative.
 
 --- Decreases the saturation of a color.
 -- Returns the desaturated color value.
@@ -252,51 +272,74 @@ end
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- @param m By how much the saturation should be decreased, {m ∈ ℝ: -1 ≤ m ≤ 1}
+-- @param operation Which type of operation to perform. "add" for additive or "multi" for multiplicative. Defaults to additive.
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:Desaturate(.1, .2, .3, .4) would return the values 0.12, 0.21, 0.3
+-- @usage Prism:Desaturate(.1, .2, .3, .4, "add") would return the values 0.22, 0.26, 0.3
+-- @usage Prism:Desaturate(.1, .2, .3, .4, "multi") would return the values 0.18, 0.24, 0.3
 
-function Prism:Desaturate(r, g, b, m)
-   return self:Saturate(r, g, b, -m)
+function Prism:Desaturate(r, g, b, m, operation)
+   return self:Saturate(r, g, b, -m, operation)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :Lighten(r, g, b, m)
+-- :Lighten(r, g, b, m, type)
 --
 -- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - operation - What type of operation to perform, can be "add" for additive or "multi" for multiplicative.
 
 --- Brightens a color.
 -- Returns the brighter color value.
--- @paramsig r, g, b, d
+-- @paramsig r, g, b, m
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- @param m By how much the brightness should be increased, {m ∈ ℝ: -1 ≤ m ≤ 1}
+-- @param type Which type of operation to perform. "add" for additive or "multi" for multiplicative. Defaults to additive.
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:Lighten(.1, .2, .3, .4) would return the values 0, 0.35, 0.7
+-- @usage Prism:Lighten(.1, .2, .3, .4, "add") would return the values 0.233..., 0.466..., 0.7
+-- @usage Prism:Lighten(.1, .2, .3, .4, "multi") would return the values 0.14, 0.28, 0.42
 
-function Prism:Lighten(r, g, b, m)
+function Prism:Lighten(r, g, b, m, operation)
    local msg = nil
+   if not operation then operation = TYPE_ADD
+   else
+      operation = string.lower(operation)
+      if string.match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
+      elseif string.match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
+      else msg = string.format("unknown operation type: %s", operation) end
+   end
 
    if not r or not g or not b or not m then
-      error("Usage: Prism:Saturate(r, g, b, m)", 2)
+      error("Usage: Prism:Lighten(r, g, b, m, operation)", 2)
 
    elseif type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" or type(m) ~= "number" then
       msg = "number expected"
 
-   elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 or m < -1 or m > 1 then
-      msg = "numbers outside of expected range"
+   elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 then
+      msg = "color values expected to be within [0,1]"
+
+   elseif operation == TYPE_ADD and (m < -1 or m > 1) then
+      msg = "additive operation modifier expected to be within [-1,1]"
    end
 
-   if msg then error(("Usage: Prism:Saturate(r, g, b, m): %s").format(msg),2) end
+   if msg then error(string.format("Usage: Prism:Lighten(r, g, b, m, operation): %s", msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
-   v = v + m
+   if operation == TYPE_MULTI then
+      -- Have to take special care of negative values here.
+      if m < -1 then m = 0 elseif m < 0 then m = 1-(math.abs(m)) else m = 1+m end
+      v = v*m
+   else
+      v = v+m
+   end
+
    if v < 0 then v = 0 elseif v > 1 then v = 1 end
 
    return self:HSVtoRGB(h, s, v)
@@ -309,6 +352,7 @@ end
 -- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - operation - What type of operation to perform, can be "add" for additive or "multi" for multiplicative.
 
 --- Darkens a color.
 -- Returns the darker color value.
@@ -317,11 +361,13 @@ end
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- @param m By how much the brightness should be decreased, {m ∈ ℝ: -1 ≤ m ≤ 1}
+-- @param operation Which type of operation to perform. "add" for additive or "multi" for multiplication. Defaults to additive.
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:Darken(.4, .3, .2, .1) would return the values 0.3, 0.15, 0
+-- @usage Prism:Darken(.1, .2, .3, .4, "add") would return the values 0, 0, 0
+-- @usage Prism:Darken(.1, .2, .3, .4, "multi") would return the values 0.06, 0.12, 0.18
 
-function Prism:Darken(r, g, b, m, type)
-   return self:Lighten(r, g, b, -m)
+function Prism:Darken(r, g, b, m, operation)
+   return self:Lighten(r, g, b, -m, operation)
 end
