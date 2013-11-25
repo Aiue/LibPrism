@@ -32,7 +32,7 @@ local ipairs = ipairs
 
 -- Constants. Sort of, anyway. While they certainly can be modified, they won't. Their purpose is that of a constant anyway.
 local TYPE_ADD = "add" --addition
-local TYPE_DIV = "div" --division
+local TYPE_DIV = "div" --division -- Yes, this indicates there MAY be plans to include this eventually.
 local TYPE_MULTI = "multi" --multiplication
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
@@ -209,7 +209,7 @@ end
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param m By how much the saturation should be increased, {m ∈ ℝ: -1 ≤ m ≤ 1}
+-- @param m By how much the saturation should be increased, {m ∈ ℝ: -1 ≤ m ≤ 1} for additive, m ∈ ℝ for multiplicative.
 -- @param operation Which type of operation to perform. "add" for additive or "multi" for multiplicative. Defaults to additive.
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
@@ -243,12 +243,8 @@ function Prism:Saturate(r, g, b, m, operation)
    if msg then error(string.format("Usage: Prism:Saturate(r, g, b, m, operation): %s", msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
-   if operation == TYPE_MULTI then
-      -- Have to take special care of negative values here.
-      if m < -1 then m = 0 elseif m < 0 then m = 1-(math.abs(m)) else m = 1+m end
-      s = s*m
-   else
-      s = s+m
+   if operation == TYPE_MULTI then s = s*(1+m)
+   else s = s+m
    end
 
    if s < 0 then s = 0 elseif s > 1 then s = 1 end
@@ -271,7 +267,7 @@ end
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param m By how much the saturation should be decreased, {m ∈ ℝ: -1 ≤ m ≤ 1}
+-- @param m By how much the saturation should be decreased, {m ∈ ℝ: -1 ≤ m ≤ 1} for additive, m ∈ ℝ for multiplicative.
 -- @param operation Which type of operation to perform. "add" for additive or "multi" for multiplicative. Defaults to additive.
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
@@ -332,12 +328,8 @@ function Prism:Lighten(r, g, b, m, operation)
    if msg then error(string.format("Usage: Prism:Lighten(r, g, b, m, operation): %s", msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
-   if operation == TYPE_MULTI then
-      -- Have to take special care of negative values here.
-      if m < -1 then m = 0 elseif m < 0 then m = 1-(math.abs(m)) else m = 1+m end
-      v = v*m
-   else
-      v = v+m
+   if operation == TYPE_MULTI then v = v*(1+m)
+   else v = v+m
    end
 
    if v < 0 then v = 0 elseif v > 1 then v = 1 end
