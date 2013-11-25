@@ -30,6 +30,11 @@ local abs,max,min = math.abs, math.max, math.min
 local format = string.format
 local ipairs = ipairs
 
+-- Constants. Sort of, anyway. While they certainly can be modified, they won't. Their purpose is that of a constant anyway.
+local TYPE_ADD = "add" --addition
+local TYPE_DIV = "div" --division
+local TYPE_MULTI = "multi" --multiplication
+
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :GetAngleGradient(minColor, maxColor, modifier)
 -- 
@@ -136,7 +141,7 @@ function Prism:RGBtoHSV(r, g, b)
    elseif max == g then h = ((b-r)/(max-min))+2
    elseif max == b then h = ((r-g)/(max-min))+4 end
    h = h*60
-   s = v/max
+   s = (max > min and (max-min)/max or 0)
 
    return h,s,v
 end
@@ -168,7 +173,7 @@ function Prism:HSVtoRGB(h, s, v)
    elseif type(h) ~= "number" or type(s) ~= "number" or type(v) ~= "number" then
       msg = "HSV values expected to be numbers."
 
-   elseif s < 0 or s > 1 or v < 0 or v > 1 then -- skipping h for now, since at any value it can be thought of as h%360 anyway.
+   elseif s < 0 or s > 1 or v < 0 or v > 1 then -- skipping h for now, since it is periodical anyway.
       msg = "numbers expected to be within [0,1]"
    end
 
@@ -190,11 +195,13 @@ function Prism:HSVtoRGB(h, s, v)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :Saturate(r, g, b, d)
+-- :Saturate(r, g, b, m)
 --
 -- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - type - What type of operation to perform, can be "add" for additive, "div" for divisive and "multi" for multiplicative.
 
 --- Increases the saturation of a color.
 -- Returns the saturated color value.
@@ -202,36 +209,37 @@ end
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param d By how much the saturation should be increased, {d ∈ ℝ: -1 ≤ d ≤ 1}
+-- @param m By how much the saturation should be increased, {m ∈ ℝ: -1 ≤ m ≤ 1}
+-- @param type Which type of operation to perform. "add" for additive, "div" for divisive or "multi" for multiplicative.
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- @usage Prism:Saturate(.1, .2, .3, .4) would return the values 0, 0.15, 0.3
 
-function Prism:Saturate(r, g, b, d)
+function Prism:Saturate(r, g, b, m)
    local msg = nil
 
-   if not r or not g or not b or not d then
-      error("Usage: Prism:Saturate(r, g, b, d)", 2)
+   if not r or not g or not b or not m then
+      error("Usage: Prism:Saturate(r, g, b, m)", 2)
 
-   elseif type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" or type(d) ~= "number" then
+   elseif type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" or type(m) ~= "number" then
       msg = "number expected"
 
-   elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 or d < -1 or d > 1 then
-      msg = "numbers outside of expected range"
-   end
+   elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 then
+      msg = "color values expected to be within [0,1]"
 
-   if msg then error(("Usage: Prism:Saturate(r, g, b, d): %s").format(msg),2) end
+   if msg then error(("Usage: Prism:Saturate(r, g, b, m): %s").format(msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
-   s = s + d
+   s = s+m
+
    if s < 0 then s = 0 elseif s > 1 then s = 1 end
 
    return self:HSVtoRGB(h, s, v)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :Desaturate(r, g, b, d)
+-- :Desaturate(r, g, b, m)
 --
 -- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
@@ -239,26 +247,27 @@ end
 
 --- Decreases the saturation of a color.
 -- Returns the desaturated color value.
--- @paramsig r, g, b, d
+-- @paramsig r, g, b, m
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param d By how much the saturation should be decreased, {d ∈ ℝ: -1 ≤ d ≤ 1}
+-- @param m By how much the saturation should be decreased, {m ∈ ℝ: -1 ≤ m ≤ 1}
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- @usage Prism:Desaturate(.1, .2, .3, .4) would return the values 0.12, 0.21, 0.3
 
-function Prism:Desaturate(r, g, b, d)
-   return self:Saturate(r, g, b, -d)
+function Prism:Desaturate(r, g, b, m)
+   return self:Saturate(r, g, b, -m)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :Lighten(r, g, b, d)
+-- :Lighten(r, g, b, m)
 --
 -- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
 
 --- Brightens a color.
 -- Returns the brighter color value.
@@ -266,53 +275,53 @@ end
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param d By how much the brightness should be increased, {d ∈ ℝ: -1 ≤ d ≤ 1}
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- @usage Prism:Lighten(.1, .2, .3, .4) would return the values 0, 0.35, 0.7
 
-function Prism:Lighten(r, g, b, d)
+function Prism:Lighten(r, g, b, m)
    local msg = nil
 
-   if not r or not g or not b or not d then
-      error("Usage: Prism:Saturate(r, g, b, d)", 2)
+   if not r or not g or not b or not m then
+      error("Usage: Prism:Saturate(r, g, b, m)", 2)
 
-   elseif type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" or type(d) ~= "number" then
+   elseif type(r) ~= "number" or type(g) ~= "number" or type(b) ~= "number" or type(m) ~= "number" then
       msg = "number expected"
 
-   elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 or d < -1 or d > 1 then
+   elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 or m < -1 or m > 1 then
       msg = "numbers outside of expected range"
    end
 
-   if msg then error(("Usage: Prism:Saturate(r, g, b, d): %s").format(msg),2) end
+   if msg then error(("Usage: Prism:Saturate(r, g, b, m): %s").format(msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
-   v = v + d
+   v = v + m
    if v < 0 then v = 0 elseif v > 1 then v = 1 end
 
    return self:HSVtoRGB(h, s, v)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :Darken(r, g, b, d)
+-- :Darken(r, g, b, m)
 --
 -- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
 
 --- Darkens a color.
 -- Returns the darker color value.
--- @paramsig r, g, b, d
+-- @paramsig r, g, b, m, type
 -- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param d By how much the brightness should be decreased, {d ∈ ℝ: -1 ≤ d ≤ 1}
+-- @param m By how much the brightness should be decreased, {m ∈ ℝ: -1 ≤ m ≤ 1}
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
 -- @usage Prism:Darken(.4, .3, .2, .1) would return the values 0.3, 0.15, 0
 
-function Prism:Darken(r, g, b, d)
-   return self:Lighten(r, g, b, -d)
+function Prism:Darken(r, g, b, m, type)
+   return self:Lighten(r, g, b, -m)
 end
