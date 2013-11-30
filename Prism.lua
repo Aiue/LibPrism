@@ -27,15 +27,15 @@ if not Prism then return end
 -- Glocals.
 local error,tonumber = error,tonumber
 local abs,max,min = math.abs, math.max, math.min
-local format = string.format
+local format,lower = string.format, string.lower
 local ipairs = ipairs
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- Constants. Sort of, anyway. While they certainly can be modified, they won't. Their purpose is that of a constant anyway.
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- Gradient types.
-local TYPE_ANGLE = "angle"
-local TYPE_LINEAR = "linear"
+local TYPE_HSV = "hsv"
+local TYPE_RGB = "rgb"
 
 -- Operation types.
 local TYPE_ADD = "add" --addition
@@ -45,7 +45,7 @@ local TYPE_MULTI = "multi" --multiplication
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- Local gradient functions.
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
-local function getAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
+local function getHSVGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
    local hMin, hMax, sMin, sMAx, vMin, vMax
    local h, s, v, r, g, b
 
@@ -57,9 +57,11 @@ local function getAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
    return format('%02x%02x%02x', r*255, g*255, b*255), r, g, b
 end
 
---local function getLinearGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
-   
---end
+local function getRGBGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
+   local r, g, b = x*(rMax-rMin)+rMin, x*(gMax-gMin)+gMin, x*(bMax-bMin)+bMin
+
+   return format('%02x%02x%02x', r*255, g*255, b*255), r, g, b
+end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :Gradient(type, rMin, rMax, gMin, gMax, bMin, bMax, x)
@@ -73,23 +75,23 @@ end
 -- - bMax - Red color at the lowest point. {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
 -- - x - the x coordinate of the desired gradient, {m ∈ ℝ: 0 ≤ m ≤ 1}
 
---- Get the angle gradient between two colors.
+--- Get the gradient between two colors.
 -- Call with 2*rgb values representing the colors at x = 0 and x = 1 respectively, alongside the x coordinate you wish to get the value for and the type of gradient to use.
 -- @paramsig type, rMin, rMax, gMin, gMax, bMin, bMax, x
--- @param type Which gradient type to use. Currently supports angle. More may be added at a later date.
+-- @param type Which gradient type to use. Currently supports hsv and rgb. More may be added at a later date.
 -- @param rMin The red color value at your starting point, {rMin ∈ ℝ: 0 ≤ rMin ≤ 1}
 -- @param rMax The red color value at your ending point, {rMax ∈ ℝ: 0 ≤ rMax ≤ 1}
 -- @param gMin The green color value at your starting point, {gMin ∈ ℝ: 0 ≤ gMin ≤ 1}
 -- @param gMax The green color value at your ending point, {gMax ∈ ℝ: 0 ≤ gMax ≤ 1}
 -- @param bMin The blue color value at your starting point, {bMin ∈ ℝ: 0 ≤ bMin ≤ 1}
 -- @param bMaxThe blue color value at your ending point, {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
--- @param x The x coordinate, or a percentage describing how far the point the desired color is from the two end points, {x ∈ ℝ: 0 ≤ x ≤ 1} is expected, but if x < 0 it will default to 0, and if x > 1 it will default to 1. For convenience, 0/0 will be defined as 0 for the purposes of this function.
+-- @param x The x coordinate, or in other words a percentage describing how far the point the desired color is from the two end points, {x ∈ ℝ: 0 ≤ x ≤ 1} is expected, but if x < 0 it will default to 0, and if x > 1 it will default to 1. For convenience, 0/0 will be defined as 0 for the purposes of this function.
 -- @return Hexadecimal string, [00,ff][00,ff][00,ff]
 -- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
 -- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
 -- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @usage Prism:GetAngleGradient(1, 0, 0, 1, 0, 0}, .5) would return the values "ffff00", 1, 1, 0
--- @usage Prism:GetAngleGradient(0, 1, 1, 1, 1, 0, .25) would return the values "00ff7f", 0, 1, 0.5
+-- @usage Prism:Gradient("hsv", 1, 0, 0, 1, 0, 0}, .5) would return the values "ffff00", 1, 1, 0
+-- @usage Prism:Gradient("hsv", 0, 1, 1, 1, 1, 0, .25) would return the values "00ff7f", 0, 1, 0.5
 
 function Prism:Gradient(gType, rMin, rMax, gMin, gMax, bMin, bMax, x)
    local msg = nil
@@ -99,7 +101,7 @@ function Prism:Gradient(gType, rMin, rMax, gMin, gMax, bMin, bMax, x)
       error("Usage: Prism:Gradient(type, rMin, rMax, gMin, gMax, bMin, bMax, x)", 2)
    elseif type(gType) ~= "string" then
       msg = string.format("gradient type expected to be string, got %s", type(gType))
-   elseif gType ~= TYPE_ANGLE and gType ~= TYPE_LINEAR then
+   elseif lower(gType) ~= TYPE_HSV and lower(gType) ~= TYPE_HSV then
       msg = string.format("unknown gradient type, %s", gType)
    elseif type(x) ~= "number" then
       msg = "x coordinate expected to be a number"
@@ -122,10 +124,8 @@ function Prism:Gradient(gType, rMin, rMax, gMin, gMax, bMin, bMax, x)
    -- better to use this for numbers outside the range, rather than whine about the function not being defined actually..
    if x < 0 then x = 0 elseif x > 1 then x = 1 elseif (x == 0 and x == 1) then x = 0 end -- Last check fixes undefined division.
 
---   local func = (qType == TYPE_ANGLE and getAngleGradient or (qType == TYPE_LINEAR and getLinearGradient or function(...) return "000000", 0, 0, 0 end)) -- Don't need the function at the end, actually. Better to just use default. Using it for now, though. Just because.
-   -- Using the below return right now only because it is the currently only implemented gradient type.
-   return getAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
---   return func(rMin, rMax, gMin, gMax, bMin, bMax, x)
+   local func = (lower(gType) == TYPE_HSV and getHSVGradient or (lower(gType) == TYPE_RGB and getRGBGradient))
+   return func(rMin, rMax, gMin, gMax, bMin, bMax, x)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
@@ -249,7 +249,7 @@ function Prism:Saturate(r, g, b, m, operation)
    local msg = nil
    if not operation then operation = TYPE_ADD
    else
-      operation = string.lower(operation)
+      operation = lower(operation)
       if string.match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
       elseif string.match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
       else msg = string.format("unknown operation type: %s", operation) end
@@ -334,7 +334,7 @@ function Prism:Lighten(r, g, b, m, operation)
    local msg = nil
    if not operation then operation = TYPE_ADD
    else
-      operation = string.lower(operation)
+      operation = lower(operation)
       if string.match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
       elseif string.match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
       else msg = string.format("unknown operation type: %s", operation) end
@@ -397,6 +397,6 @@ end
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 
 function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
-   return self:Gradient("angle", rMin, rMax, gMin, gMax, bMin, bMax, x)
+   return self:Gradient("hsv", rMin, rMax, gMin, gMax, bMin, bMax, x)
 end
 
