@@ -46,7 +46,7 @@ local TYPE_MULTI = "multi" --multiplication
 -- Local gradient functions.
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 local function getHSVGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
-   local hMin, hMax, sMin, sMAx, vMin, vMax
+   local hMin, hMax, sMin, sMax, vMin, vMax
    local h, s, v, r, g, b
 
    hMin,sMin,vMin = Prism:RGBtoHSV(rMin, gMin, bMin)
