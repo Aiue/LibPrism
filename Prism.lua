@@ -394,28 +394,6 @@ function Prism:Darken(r, g, b, m, operation)
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- :GradientString(gType, inStr, rMin, rMax, gMin, gMax, bMin, bMax, step)
---
--- - gType - (str) Which gradient type to use.
--- - inStr - (str) The string to colourize.
--- - rMin - (float) Red color at the lowest point. 0 ≤ rMin ≤ 1
--- - rMax - (float) Red color at the lowest point. 0 ≤ rMax ≤ 1
--- - gMin - (float) Red color at the lowest point. 0 ≤ gMin ≤ 1
--- - gMax - (float) Red color at the lowest point. 0 ≤ gMax ≤ 1
--- - bMin - (float) Red color at the lowest point. 0 ≤ bMin ≤ 1
--- - bMax - (float) Red color at the lowest point. 0 ≤ bMax ≤ 1
--- - step - (int) The amount of characters that will share colour. 1 ≤ int ≤ length(inStr)
-
---- Gradiently colourizes a string.
--- Returns the colourized string.
--- @paramsig gType, inStr, rMin, rMax, gMin, gMax, bMin, bMax, step
--- finish this later, meh
-
-function Prism:GradientString(gType, inStr, rMin, rMax, gMin, gMax, bMin, bMax, step)
-   
-end
-
---..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- Functions kept for backwards compatibility.
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 
