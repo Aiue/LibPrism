@@ -10,6 +10,7 @@
 -- Written by Aiue (Jens Nilsson Sahlin)
 -- Released under the Creative Commons license as
 -- Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)
+-- Lazily defining F as the set of all values the 'numer' type can have.
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 
 local MAJOR = "LibPrism-1.0"
@@ -67,29 +68,29 @@ end
 -- :Gradient(type, rMin, rMax, gMin, gMax, bMin, bMax, x)
 -- 
 -- - type - Which gradient type to use.
--- - rMin - Red color at the lowest point. {rMin ∈ ℝ: 0 ≤ rMin ≤ 1}
--- - rMax - Red color at the lowest point. {rMax ∈ ℝ: 0 ≤ rMax ≤ 1}
--- - gMin - Red color at the lowest point. {gMin ∈ ℝ: 0 ≤ gMin ≤ 1}
--- - gMax - Red color at the lowest point. {gMax ∈ ℝ: 0 ≤ gMax ≤ 1}
--- - bMin - Red color at the lowest point. {bMin ∈ ℝ: 0 ≤ bMin ≤ 1}
--- - bMax - Red color at the lowest point. {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
--- - x - the x coordinate of the desired gradient, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - rMin - Red color at the lowest point. {rMin ∈ F: 0 ≤ rMin ≤ 1}
+-- - rMax - Red color at the lowest point. {rMax ∈ F: 0 ≤ rMax ≤ 1}
+-- - gMin - Red color at the lowest point. {gMin ∈ F: 0 ≤ gMin ≤ 1}
+-- - gMax - Red color at the lowest point. {gMax ∈ F: 0 ≤ gMax ≤ 1}
+-- - bMin - Red color at the lowest point. {bMin ∈ F: 0 ≤ bMin ≤ 1}
+-- - bMax - Red color at the lowest point. {bMax ∈ F: 0 ≤ bMax ≤ 1}
+-- - x - the x coordinate of the desired gradient, {m ∈ F: 0 ≤ m ≤ 1}
 
 --- Get the gradient between two colors.
 -- Call with 2*rgb values representing the colors at x = 0 and x = 1 respectively, alongside the x coordinate you wish to get the value for and the type of gradient to use.
 -- @paramsig type, rMin, rMax, gMin, gMax, bMin, bMax, x
 -- @param type Which gradient type to use. Currently supports hsv and rgb. More may be added at a later date.
--- @param rMin The red color value at your starting point, {rMin ∈ ℝ: 0 ≤ rMin ≤ 1}
--- @param rMax The red color value at your ending point, {rMax ∈ ℝ: 0 ≤ rMax ≤ 1}
--- @param gMin The green color value at your starting point, {gMin ∈ ℝ: 0 ≤ gMin ≤ 1}
--- @param gMax The green color value at your ending point, {gMax ∈ ℝ: 0 ≤ gMax ≤ 1}
--- @param bMin The blue color value at your starting point, {bMin ∈ ℝ: 0 ≤ bMin ≤ 1}
--- @param bMaxThe blue color value at your ending point, {bMax ∈ ℝ: 0 ≤ bMax ≤ 1}
--- @param x The x coordinate, or in other words a percentage describing how far the point the desired color is from the two end points, {x ∈ ℝ: 0 ≤ x ≤ 1} is expected, but if x < 0 it will default to 0, and if x > 1 it will default to 1. For convenience, 0/0 will be defined as 0 for the purposes of this function.
+-- @param rMin The red color value at your starting point, {rMin ∈ F: 0 ≤ rMin ≤ 1}
+-- @param rMax The red color value at your ending point, {rMax ∈ F: 0 ≤ rMax ≤ 1}
+-- @param gMin The green color value at your starting point, {gMin ∈ F: 0 ≤ gMin ≤ 1}
+-- @param gMax The green color value at your ending point, {gMax ∈ F: 0 ≤ gMax ≤ 1}
+-- @param bMin The blue color value at your starting point, {bMin ∈ F: 0 ≤ bMin ≤ 1}
+-- @param bMaxThe blue color value at your ending point, {bMax ∈ F: 0 ≤ bMax ≤ 1}
+-- @param x The x coordinate, or in other words a percentage describing how far the point the desired color is from the two end points, {x ∈ F: 0 ≤ x ≤ 1} is expected, but if x < 0 it will default to 0, and if x > 1 it will default to 1. For convenience, 0/0 will be defined as 0 for the purposes of this function.
 -- @return Hexadecimal string, [00,ff][00,ff][00,ff]
--- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- @return The r value, where {r ∈ F: 0 ≤ r ≤ 1}
+-- @return The g value, where {g ∈ F: 0 ≤ g ≤ 1}
+-- @return The b value, where {b ∈ F: 0 ≤ b ≤ 1}
 -- @usage Prism:Gradient("hsv", 1, 0, 0, 1, 0, 0}, .5) would return the values "ffff00", 1, 1, 0
 -- @usage Prism:Gradient("hsv", 0, 1, 1, 1, 1, 0, .25) would return the values "00ff7f", 0, 1, 0.5
 
@@ -131,19 +132,19 @@ end
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :RGBtoHSV(r, g, b)
 -- 
--- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- - r - red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- - g - green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- - b - blue color value, {b ∈ F: 0 ≤ b ≤ 1}
 
 --- Converts a color from RGB to HSV.
 -- Returns the HSV values corresponding to the input RGB color.
 -- @paramsig r, g, b
--- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @return The h value, where {h ∈ ℝ: 0 ≤ h ≤ 360}
--- @return The s value, where {s ∈ ℝ: 0 ≤ s ≤ 1}
--- @return The v value, where {v ∈ ℝ: 0 ≤ v ≤ 1}
+-- @param r The red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- @param g The green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- @param b The blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- @return The h value, where {h ∈ F: 0 ≤ h ≤ 360}
+-- @return The s value, where {s ∈ F: 0 ≤ s ≤ 1}
+-- @return The v value, where {v ∈ F: 0 ≤ v ≤ 1}
 -- @usage Prism:RGBtoHSV(0, 1, 0) would return the values 120, 1, 1
 
 function Prism:RGBtoHSV(r, g, b)
@@ -177,19 +178,19 @@ end
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :HSVtoRBG(h, s, v)
 -- 
--- - h - hue, {h ∈ ℝ: 0 ≤ h ≤ 360}
--- - s - saturation, {s ∈ ℝ: 0 ≤ s ≤ 1}
--- - v - value, {v ∈ ℝ: 0 ≤ v ≤ 1}
+-- - h - hue, {h ∈ F: 0 ≤ h ≤ 360}
+-- - s - saturation, {s ∈ F: 0 ≤ s ≤ 1}
+-- - v - value, {v ∈ F: 0 ≤ v ≤ 1}
 
 --- Converts a color from HSV to RGB.
 -- Returns the RGB values corresponding to the input HSV color.
 -- @paramsig h, s, v
--- @param h The hue, {h ∈ ℝ: 0 ≤ h ≤ 360}
--- @param s The saturation, {s ∈ ℝ: 0 ≤ s ≤ 1}
--- @param v The brightness value, {v ∈ ℝ: 0 ≤ v ≤ 1}
--- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- @param h The hue, {h ∈ F: 0 ≤ h ≤ 360}
+-- @param s The saturation, {s ∈ F: 0 ≤ s ≤ 1}
+-- @param v The brightness value, {v ∈ F: 0 ≤ v ≤ 1}
+-- @return The r value, where {r ∈ F: 0 ≤ r ≤ 1}
+-- @return The g value, where {g ∈ F: 0 ≤ g ≤ 1}
+-- @return The b value, where {b ∈ F: 0 ≤ b ≤ 1}
 -- @usage Prism:HSVtoRGB(90, 1, 1) would return 0.5, 1, 0
 
 function Prism:HSVtoRGB(h, s, v)
@@ -225,23 +226,23 @@ end
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :Saturate(r, g, b, m, operation)
 --
--- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - r - red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- - g - green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- - b - blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- - m - modifier, {m ∈ F: 0 ≤ m ≤ 1}
 -- - operation - What type of operation to perform, can be "add" for additive or "multi" for multiplicative.
 
 --- Increases the saturation of a color.
 -- Returns the saturated color value.
 -- @paramsig r, g, b, m
--- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param m By how much the saturation should be increased, {m ∈ ℝ: -1 ≤ m ≤ 1} for additive, m ∈ ℝ for multiplicative.
+-- @param r The red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- @param g The green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- @param b The blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- @param m By how much the saturation should be increased, {m ∈ F: -1 ≤ m ≤ 1} for additive, m ∈ F for multiplicative.
 -- @param operation Which type of operation to perform. "add" for additive or "multi" for multiplicative. Defaults to additive.
--- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- @return The r value, where {r ∈ F: 0 ≤ r ≤ 1}
+-- @return The g value, where {g ∈ F: 0 ≤ g ≤ 1}
+-- @return The b value, where {b ∈ F: 0 ≤ b ≤ 1}
 -- @usage Prism:Saturate(.1, .2, .3, .4, "add") would return the values 0, 0.15, 0.3
 -- @usage Prism:Saturate(.1, .2, .3, .4, "multi") would return the values 0.02, 0.16, 0.3
 
@@ -283,23 +284,23 @@ end
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :Desaturate(r, g, b, operation)
 --
--- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - r - red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- - g - green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- - b - blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- - m - modifier, {m ∈ F: 0 ≤ m ≤ 1}
 -- - operation - What type of operation to perform, can be "add" for additive or "multi" for multiplicative.
 
 --- Decreases the saturation of a color.
 -- Returns the desaturated color value.
 -- @paramsig r, g, b, m
--- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param m By how much the saturation should be decreased, {m ∈ ℝ: -1 ≤ m ≤ 1} for additive, m ∈ ℝ for multiplicative.
+-- @param r The red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- @param g The green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- @param b The blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- @param m By how much the saturation should be decreased, {m ∈ F: -1 ≤ m ≤ 1} for additive, m ∈ F for multiplicative.
 -- @param operation Which type of operation to perform. "add" for additive or "multi" for multiplicative. Defaults to additive.
--- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- @return The r value, where {r ∈ F: 0 ≤ r ≤ 1}
+-- @return The g value, where {g ∈ F: 0 ≤ g ≤ 1}
+-- @return The b value, where {b ∈ F: 0 ≤ b ≤ 1}
 -- @usage Prism:Desaturate(.1, .2, .3, .4, "add") would return the values 0.22, 0.26, 0.3
 -- @usage Prism:Desaturate(.1, .2, .3, .4, "multi") would return the values 0.18, 0.24, 0.3
 
@@ -310,23 +311,23 @@ end
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :Lighten(r, g, b, m, type)
 --
--- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - r - red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- - g - green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- - b - blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- - m - modifier, {m ∈ F: 0 ≤ m ≤ 1}
 -- - operation - What type of operation to perform, can be "add" for additive or "multi" for multiplicative.
 
 --- Brightens a color.
 -- Returns the brighter color value.
 -- @paramsig r, g, b, m
--- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param m By how much the brightness should be increased, {m ∈ ℝ: -1 ≤ m ≤ 1}
+-- @param r The red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- @param g The green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- @param b The blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- @param m By how much the brightness should be increased, {m ∈ F: -1 ≤ m ≤ 1}
 -- @param type Which type of operation to perform. "add" for additive or "multi" for multiplicative. Defaults to additive.
--- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- @return The r value, where {r ∈ F: 0 ≤ r ≤ 1}
+-- @return The g value, where {g ∈ F: 0 ≤ g ≤ 1}
+-- @return The b value, where {b ∈ F: 0 ≤ b ≤ 1}
 -- @usage Prism:Lighten(.1, .2, .3, .4, "add") would return the values 0.233..., 0.466..., 0.7
 -- @usage Prism:Lighten(.1, .2, .3, .4, "multi") would return the values 0.14, 0.28, 0.42
 
@@ -368,28 +369,50 @@ end
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :Darken(r, g, b, m)
 --
--- - r - red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- - g - green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- - b - blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- - m - modifier, {m ∈ ℝ: 0 ≤ m ≤ 1}
+-- - r - red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- - g - green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- - b - blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- - m - modifier, {m ∈ F: 0 ≤ m ≤ 1}
 -- - operation - What type of operation to perform, can be "add" for additive or "multi" for multiplicative.
 
 --- Darkens a color.
 -- Returns the darker color value.
 -- @paramsig r, g, b, m, type
--- @param r The red color value, {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @param g The green color value, {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @param b The blue color value, {b ∈ ℝ: 0 ≤ b ≤ 1}
--- @param m By how much the brightness should be decreased, {m ∈ ℝ: -1 ≤ m ≤ 1}
+-- @param r The red color value, {r ∈ F: 0 ≤ r ≤ 1}
+-- @param g The green color value, {g ∈ F: 0 ≤ g ≤ 1}
+-- @param b The blue color value, {b ∈ F: 0 ≤ b ≤ 1}
+-- @param m By how much the brightness should be decreased, {m ∈ F: -1 ≤ m ≤ 1}
 -- @param operation Which type of operation to perform. "add" for additive or "multi" for multiplication. Defaults to additive.
--- @return The r value, where {r ∈ ℝ: 0 ≤ r ≤ 1}
--- @return The g value, where {g ∈ ℝ: 0 ≤ g ≤ 1}
--- @return The b value, where {b ∈ ℝ: 0 ≤ b ≤ 1}
+-- @return The r value, where {r ∈ F: 0 ≤ r ≤ 1}
+-- @return The g value, where {g ∈ F: 0 ≤ g ≤ 1}
+-- @return The b value, where {b ∈ F: 0 ≤ b ≤ 1}
 -- @usage Prism:Darken(.1, .2, .3, .4, "add") would return the values 0, 0, 0
 -- @usage Prism:Darken(.1, .2, .3, .4, "multi") would return the values 0.06, 0.12, 0.18
 
 function Prism:Darken(r, g, b, m, operation)
    return self:Lighten(r, g, b, -m, operation)
+end
+
+--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
+-- :GradientString(gType, inStr, rMin, rMax, gMin, gMax, bMin, bMax, step)
+--
+-- - gType - (str) Which gradient type to use.
+-- - inStr - (str) The string to colourize.
+-- - rMin - (float) Red color at the lowest point. 0 ≤ rMin ≤ 1
+-- - rMax - (float) Red color at the lowest point. 0 ≤ rMax ≤ 1
+-- - gMin - (float) Red color at the lowest point. 0 ≤ gMin ≤ 1
+-- - gMax - (float) Red color at the lowest point. 0 ≤ gMax ≤ 1
+-- - bMin - (float) Red color at the lowest point. 0 ≤ bMin ≤ 1
+-- - bMax - (float) Red color at the lowest point. 0 ≤ bMax ≤ 1
+-- - step - (int) The amount of characters that will share colour. 1 ≤ int ≤ length(inStr)
+
+--- Gradiently colourizes a string.
+-- Returns the colourized string.
+-- @paramsig gType, inStr, rMin, rMax, gMin, gMax, bMin, bMax, step
+-- finish this later, meh
+
+function Prism:GradientString(gType, inStr, rMin, rMax, gMin, gMax, bMin, bMax, step)
+   
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
