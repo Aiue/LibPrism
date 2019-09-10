@@ -1,4 +1,4 @@
-## Interface: 70100
+## Interface: 11302
 ## Title: Lib: Prism-1.0
 ## Notes: Color manipulation library.
 ## Author: Aiue
