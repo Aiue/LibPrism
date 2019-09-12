@@ -15,7 +15,7 @@
 
 local MAJOR = "LibPrism-1.0"
 --[===[@non-debug@
-local MINOR = --@project-date-integer@
+local MINOR = @project-date-integer@
    --@end-non-debug@]===]
 --@debug@
 MINOR = 11e11
