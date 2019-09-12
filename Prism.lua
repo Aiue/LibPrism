@@ -102,7 +102,7 @@ function Prism:Gradient(gType, rMin, rMax, gMin, gMax, bMin, bMax, x)
       error("Usage: Prism:Gradient(type, rMin, rMax, gMin, gMax, bMin, bMax, x)", 2)
    elseif type(gType) ~= "string" then
       msg = string.format("gradient type expected to be string, got %s", type(gType))
-   elseif lower(gType) ~= TYPE_HSV and lower(gType) ~= TYPE_HSV then
+   elseif lower(gType) ~= TYPE_HSV and lower(gType) ~= TYPE_RGB then
       msg = string.format("unknown gradient type, %s", gType)
    elseif type(x) ~= "number" then
       msg = "x coordinate expected to be a number"
