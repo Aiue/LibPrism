@@ -9,6 +9,7 @@
 ## Author: Aiue
 ## Version: @project-version@
 ## X-Curse-Project-ID: 69005
+## X-WoWI-ID: 25411
 
 Libs\LibStub\LibStub.lua
 
