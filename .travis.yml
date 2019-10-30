@@ -6,10 +6,15 @@ addons:
     packages:
     - pandoc
  
+install: luarocks install --local luacheck
+
 script:
+  - /home/travis/.luarocks/bin/luacheck . --no-color --no-self -q
   - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash
   - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -g 1.13.2
- 
+
+after_failure: after_failure: curl -s https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh | bash -s -- failure $WEBHOOK
+
 branches:
   only:
   - /^v\d+\.\d+\.\d+(\w+)?$/
