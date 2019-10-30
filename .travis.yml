@@ -13,7 +13,7 @@ script:
   - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash
   - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -g 1.13.2
 
-after_failure: after_failure: curl -s https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh | bash -s -- failure $WEBHOOK
+after_failure: curl -s https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh | bash -s -- failure $WEBHOOK
 
 branches:
   only:
