@@ -8,14 +8,20 @@ addons:
  
 install: luarocks install --local luacheck
 
-script:
-  - /home/travis/.luarocks/bin/luacheck . --no-color --no-self -q
-  - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash
-  - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -g 1.13.2
+jobs:
+  include:
+    - if: tag IS blank
+      script: /home/travis/.luarocks/bin/luacheck . --no-color -q
+    - if: tag IS present
+      script:
+       - /home/travis/.luarocks/bin/luacheck . --no-color --no-self -q
+       - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash
+       - curl -s https://raw.githubusercontent.com/BigWigsMods/packager/master/release.sh | bash -s -g 1.13.2
 
 after_failure: curl -s https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh | bash -s -- failure $WEBHOOK
 
 branches:
   only:
+  - master
   - /^v\d+\.\d+\.\d+(\w+)?$/
   - /^v\d+\.\d+\.\d+\-(\w+)?$/
