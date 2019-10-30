@@ -11,7 +11,7 @@ install: luarocks install --local luacheck
 jobs:
   include:
     - if: tag IS blank
-      script: /home/travis/.luarocks/bin/luacheck . --no-color -q
+      script: /home/travis/.luarocks/bin/luacheck . --no-color --no-self -q
     - if: tag IS present
       script:
        - /home/travis/.luarocks/bin/luacheck . --no-color --no-self -q
