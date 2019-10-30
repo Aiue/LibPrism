@@ -18,7 +18,7 @@ local MAJOR = "LibPrism-1.0"
 local MINOR = @project-date-integer@
    --@end-non-debug@]===]
 --@debug@
-MINOR = 11e11
+local MINOR = 11e11
 --@end-debug@
 
 local Prism = LibStub:NewLibrary(MAJOR, MINOR)
@@ -26,7 +26,7 @@ local Prism = LibStub:NewLibrary(MAJOR, MINOR)
 if not Prism then return end
 
 -- Glocals.
-local error,tonumber = error,tonumber
+local error = error
 local abs,max,min = math.abs, math.max, math.min
 local format,lower = string.format, string.lower
 local ipairs = ipairs
@@ -40,7 +40,7 @@ local TYPE_RGB = "rgb"
 
 -- Operation types.
 local TYPE_ADD = "add" --addition
-local TYPE_DIV = "div" --division -- Yes, this indicates there MAY be plans to include this eventually.
+--local TYPE_DIV = "div" --division -- Yes, this indicates there MAY be plans to include this eventually.
 local TYPE_MULTI = "multi" --multiplication
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
@@ -66,7 +66,7 @@ end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :Gradient(type, rMin, rMax, gMin, gMax, bMin, bMax, x)
--- 
+--
 -- - type - Which gradient type to use.
 -- - rMin - Red color at the lowest point. {rMin ∈ F: 0 ≤ rMin ≤ 1}
 -- - rMax - Red color at the lowest point. {rMax ∈ F: 0 ≤ rMax ≤ 1}
@@ -107,7 +107,7 @@ function Prism:Gradient(gType, rMin, rMax, gMin, gMax, bMin, bMax, x)
    elseif type(x) ~= "number" then
       msg = "x coordinate expected to be a number"
    else
-      for _,v in ipairs({rMIn, rMax, gMin, gMax, bMin, bMax}) do
+      for _,v in ipairs({rMin, rMax, gMin, gMax, bMin, bMax}) do
 	 if type(v) ~= "number" then
 	    msg = string.format("expected a number, got %s", type(v))
 	    break
@@ -131,7 +131,7 @@ end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :RGBtoHSV(r, g, b)
--- 
+--
 -- - r - red color value, {r ∈ F: 0 ≤ r ≤ 1}
 -- - g - green color value, {g ∈ F: 0 ≤ g ≤ 1}
 -- - b - blue color value, {b ∈ F: 0 ≤ b ≤ 1}
@@ -162,22 +162,22 @@ function Prism:RGBtoHSV(r, g, b)
 
    if msg then error(string.format("Usage: Prism:RGBtoHSV(r, g, b): %s", msg),2) end
 
-   local min,max = min(r,g,b),max(r,g,b)
-   local h,s,v = 0,0,max
+   local mn,mx = min(r,g,b),max(r,g,b)
+   local h,v = 0,mx
 
-   if max == min then h = 0 --Division not defined when denominator is 0.
-   elseif max == r then h = ((g-b)/(max-min))%6
-   elseif max == g then h = ((b-r)/(max-min))+2
-   elseif max == b then h = ((r-g)/(max-min))+4 end
+   if mx == mn then h = 0 --Division not defined when denominator is 0.
+   elseif mx == r then h = ((g-b)/(mx-mn))%6
+   elseif mx == g then h = ((b-r)/(mx-mn))+2
+   elseif mx == b then h = ((r-g)/(mx-mn))+4 end
    h = h*60
-   s = (max > min and (max-min)/max or 0)
+   local s = (mx > mn and (mx-mn)/mx or 0)
 
    return h,s,v
 end
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 -- :HSVtoRBG(h, s, v)
--- 
+--
 -- - h - hue, {h ∈ F: 0 ≤ h ≤ 360}
 -- - s - saturation, {s ∈ F: 0 ≤ s ≤ 1}
 -- - v - value, {v ∈ F: 0 ≤ v ≤ 1}
