@@ -407,7 +407,7 @@ end
 -- modifier, operation - see respective function
 -- returns the altered string
 
-function Prism:AlterStringColors(str, r, g, b, func, modifier, operation)
+function Prism:AlterStringColor(str, r, g, b, func, modifier, operation)
    local err = nil
 
    if not operation then operation = TYPE_ADD
@@ -432,7 +432,7 @@ function Prism:AlterStringColors(str, r, g, b, func, modifier, operation)
       err = format("str expected to be string, got %s", type(str))
    elseif type(func) ~= "function" and type(func) ~= "string" then
       err = format("func expected to be function or string, got %s", type(func))
-   elseif type(func) == "string" and func == "AlterStringColors" then
+   elseif type(func) == "string" and func == "AlterStringColor" then
       err = "setting func so I'll call myself would be very bad, Carol!"
    -- Check if it's a Prism function, and one we'd want to use for this purpose.
    elseif type(func) == "string" and not Prism[func] or func == "Gradient" or func == "RGBtoHSV" or func == "HSVtoRGB" then
