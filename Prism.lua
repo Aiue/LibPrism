@@ -399,7 +399,7 @@ end
 -- Doing away with the silly comment formatting from here on.
 -- Also skipping luadoc/ldoc comments for now, as I have not at all utilized it yet. May rethink that if I figure out a good way to automate updating on it on all relevant sites.
 
--- :AlterStringColors(str, r, g, b, func, modifier, operation)
+-- :AlterStringColor(str, r, g, b, func, modifier, operation)
 -- str - the string we're altering
 -- r - unencoded r value
 -- g - unencoded g value
@@ -420,7 +420,7 @@ function Prism:AlterStringColor(str, r, g, b, func, modifier, operation)
    end
 
    if not str or not r or not g or not b or not func or not modifier then
-      error("Usage: Prism:AlterStringColors(str, r, g, b, func, modifier[, operation]", 2)
+      error("Usage: Prism:AlterStringColor(str, r, g, b, func, modifier[, operation]", 2)
    elseif type(r) ~= "number" then
       err = format("r expected to be number, got %s", type(r))
    elseif type(g) ~= "number" then
@@ -444,7 +444,7 @@ function Prism:AlterStringColor(str, r, g, b, func, modifier, operation)
       err = "additive operation modifier expected to be within [-1,1]"
    end
 
-   if err then error(format("Usage: Prism:AlterStringColors(str, r, g, b, func, modifier[, operation]: %s", err), 2) end
+   if err then error(format("Usage: Prism:AlterStringColor(str, r, g, b, func, modifier[, operation]: %s", err), 2) end
 
    local escaped_indices = {}
    local escape_index = nil
