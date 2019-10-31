@@ -393,11 +393,3 @@ function Prism:Darken(r, g, b, m, operation)
    return self:Lighten(r, g, b, -m, operation)
 end
 
---..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
--- Functions kept for backwards compatibility.
---..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
-
-function Prism:GetAngleGradient(rMin, rMax, gMin, gMax, bMin, bMax, x)
-   return self:Gradient("hsv", rMin, rMax, gMin, gMax, bMin, bMax, x)
-end
-
