@@ -359,7 +359,8 @@ function Prism:Lighten(r, g, b, m, operation)
    if msg then error(format("Usage: Prism:Lighten(r, g, b, m, operation): %s", msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
-   if operation == TYPE_MULTI then v = v*(1+m)
+   if operation == TYPE_MULTI then
+      v = v*(1+m)
    else v = v+m
    end
 
@@ -483,7 +484,7 @@ function Prism:AlterStringColor(str, r, g, b, func, modifier, operation)
    -- Replace any returns
    if type(func) == "string" then func = Prism[func] end
    local dr,dg,db = func(self, r, g, b, modifier, operation)
-   local default_color = format("|cff%02x%02x%02x", dr, dg, db)
+   local default_color = format("|cff%02x%02x%02x", dr*255, dg*255, db*255)
    str = str:gsub(delimiter.."r"..delimiter, default_color)
 
    -- Iterate over the captured colors and perform substitution.
