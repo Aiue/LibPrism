@@ -101,15 +101,15 @@ function Prism:Gradient(gType, rMin, rMax, gMin, gMax, bMin, bMax, x)
    if not x then -- Don't need to check every single variable up 'til x to find out if we have the correct amount of variables or not.
       error("Usage: Prism:Gradient(type, rMin, rMax, gMin, gMax, bMin, bMax, x)", 2)
    elseif type(gType) ~= "string" then
-      msg = string.format("gradient type expected to be string, got %s", type(gType))
+      msg = format("gradient type expected to be string, got %s", type(gType))
    elseif lower(gType) ~= TYPE_HSV and lower(gType) ~= TYPE_RGB then
-      msg = string.format("unknown gradient type, %s", gType)
+      msg = format("unknown gradient type, %s", gType)
    elseif type(x) ~= "number" then
       msg = "x coordinate expected to be a number"
    else
       for _,v in ipairs({rMin, rMax, gMin, gMax, bMin, bMax}) do
 	 if type(v) ~= "number" then
-	    msg = string.format("expected a number, got %s", type(v))
+	    msg = format("expected a number, got %s", type(v))
 	    break
 
 	 elseif v < 0 or v > 1 then
@@ -120,7 +120,7 @@ function Prism:Gradient(gType, rMin, rMax, gMin, gMax, bMin, bMax, x)
       end
    end
 
-   if msg then error(string.format("Usage: Prism:Gradient(type, rMin, rMax, gMax, gMin, bMin, bMax, x): %s", msg), 2) end
+   if msg then error(format("Usage: Prism:Gradient(type, rMin, rMax, gMax, gMin, bMin, bMax, x): %s", msg), 2) end
 
    -- better to use this for numbers outside the range, rather than whine about the function not being defined actually..
    if x < 0 then x = 0 elseif x > 1 then x = 1 elseif (x == 0 and x == 1) then x = 0 end -- Last check fixes undefined division.
@@ -160,7 +160,7 @@ function Prism:RGBtoHSV(r, g, b)
       msg = "numbers expected to be within [0,1]"
    end
 
-   if msg then error(string.format("Usage: Prism:RGBtoHSV(r, g, b): %s", msg),2) end
+   if msg then error(format("Usage: Prism:RGBtoHSV(r, g, b): %s", msg),2) end
 
    local mn,mx = min(r,g,b),max(r,g,b)
    local h,v = 0,mx
@@ -206,7 +206,7 @@ function Prism:HSVtoRGB(h, s, v)
       msg = "numbers expected to be within [0,1]"
    end
 
-   if msg then error(string.format("Usage: Prism:HSVtoRGB(h, s, v): %s", msg),2) end
+   if msg then error(format("Usage: Prism:HSVtoRGB(h, s, v): %s", msg),2) end
 
    local r,g,b
    h = (h%360) / 60
@@ -253,7 +253,7 @@ function Prism:Saturate(r, g, b, m, operation)
       operation = lower(operation)
       if string.match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
       elseif string.match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
-      else msg = string.format("unknown operation type: %s", operation) end
+      else msg = format("unknown operation type: %s", operation) end
    end
 
    if not r or not g or not b or not m then
@@ -269,7 +269,7 @@ function Prism:Saturate(r, g, b, m, operation)
       msg = "additive operation modifier expected to be within [-1,1]"
    end
 
-   if msg then error(string.format("Usage: Prism:Saturate(r, g, b, m, operation): %s", msg),2) end
+   if msg then error(format("Usage: Prism:Saturate(r, g, b, m, operation): %s", msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
    if operation == TYPE_MULTI then s = s*(1+m)
@@ -338,7 +338,7 @@ function Prism:Lighten(r, g, b, m, operation)
       operation = lower(operation)
       if string.match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
       elseif string.match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
-      else msg = string.format("unknown operation type: %s", operation) end
+      else msg = format("unknown operation type: %s", operation) end
    end
 
    if not r or not g or not b or not m then
@@ -354,7 +354,7 @@ function Prism:Lighten(r, g, b, m, operation)
       msg = "additive operation modifier expected to be within [-1,1]"
    end
 
-   if msg then error(string.format("Usage: Prism:Lighten(r, g, b, m, operation): %s", msg),2) end
+   if msg then error(format("Usage: Prism:Lighten(r, g, b, m, operation): %s", msg),2) end
 
    local h,s,v = self:RGBtoHSV(r, g, b)
    if operation == TYPE_MULTI then v = v*(1+m)
