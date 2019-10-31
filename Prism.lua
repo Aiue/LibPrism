@@ -487,7 +487,7 @@ function Prism:AlterStringColors(str, r, g, b, func, modifier, operation)
    str = str:gsub(delimiter.."r"..delimiter, default_color)
 
    -- Iterate over the captured colors and perform substitution.
-   for i,v in ipairs(captures) do
+   for _,v in ipairs(captures) do
       local rr,rg,rb = func(self, v.r, v.g, v.b, modifier, operation)
       local cstring = format("|c%02x%02x%02x%02x", v.a*255, rr*255, rg*255, rb*255)
       str = str:gsub(delimiter.."c"..delimiter, cstring, 1)
@@ -497,7 +497,7 @@ function Prism:AlterStringColors(str, r, g, b, func, modifier, operation)
    str = str:gsub("|¨", "||")
 
    -- Restore escapes that weren't escapes.
-   for i,v in ipairs(escaped_indices) do
+   for _,v in ipairs(escaped_indices) do
       str = str:sub(1, v) .. "-" .. str:sub(v+2)
    end
 
