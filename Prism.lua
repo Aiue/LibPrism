@@ -10,7 +10,7 @@
 -- Written by Aiue (Jens Nilsson Sahlin)
 -- Released under the Creative Commons license as
 -- Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0)
--- Lazily defining F as the set of all values the 'numer' type can have.
+-- Lazily defining F as the set of all values the 'number' type can have.
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
 
 local MAJOR = "LibPrism-1.0"
@@ -28,7 +28,9 @@ if not Prism then return end
 -- Glocals.
 local error = error
 local abs,max,min = math.abs, math.max, math.min
-local format,lower = string.format, string.lower
+local format,lower,match = string.format, string.lower, string.match
+local tinsert = table.insert
+local tonumber = tonumber
 local ipairs = ipairs
 
 --..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--
@@ -251,8 +253,8 @@ function Prism:Saturate(r, g, b, m, operation)
    if not operation then operation = TYPE_ADD
    else
       operation = lower(operation)
-      if string.match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
-      elseif string.match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
+      if match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
+      elseif match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
       else msg = format("unknown operation type: %s", operation) end
    end
 
@@ -336,8 +338,8 @@ function Prism:Lighten(r, g, b, m, operation)
    if not operation then operation = TYPE_ADD
    else
       operation = lower(operation)
-      if string.match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
-      elseif string.match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
+      if match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
+      elseif match(operation, "^" .. TYPE_MULTI) then operation = TYPE_MULTI
       else msg = format("unknown operation type: %s", operation) end
    end
 
@@ -393,3 +395,121 @@ function Prism:Darken(r, g, b, m, operation)
    return self:Lighten(r, g, b, -m, operation)
 end
 
+-- Doing away with the silly comment formatting from here on.
+-- Also skipping luadoc/ldoc comments for now, as I have not at all utilized it yet. May rethink that if I figure out a good way to automate updating on it on all relevant sites.
+
+-- :AlterStringColors(str, r, g, b, func, modifier, operation)
+-- str - the string we're altering
+-- r - unencoded r value
+-- g - unencoded g value
+-- b - unencoded b value
+-- func - which function to use: saturate, desaturate, lighten, darken, or custom reference (expects same arguments as these)
+-- modifier, operation - see respective function
+-- returns the altered string
+
+function Prism:AlterStringColors(str, r, g, b, func, modifier, operation)
+   local err = nil
+
+   if not operation then operation = TYPE_ADD
+   else
+      operation = lower(operation)
+      if match(operation, "^" .. TYPE_ADD) then operation = TYPE_ADD
+      elseif match(operation, "^"  .. TYPE_MULTI) then operation = TYPE_MULTI
+      else err = format("unknown operation type: %s", operation) end
+   end
+
+   if not str or not r or not g or not b or not func or not modifier then
+      error("Usage: Prism:AlterStringColors(str, r, g, b, func, modifier[, operation]", 2)
+   elseif type(r) ~= "number" then
+      err = format("r expected to be number, got %s", type(r))
+   elseif type(g) ~= "number" then
+      err = format("g expected to be number, got %s", type(g))
+   elseif type(b) ~= "number" then
+      err = format("b expected to be number, got %s", type(b))
+   elseif r < 0 or r > 1 or g < 0 or g > 1 or b < 0 or b > 1 then
+      err = "color values expected to be within [0,1]"
+   elseif type(str) ~= "string" then
+      err = format("str expected to be string, got %s", type(str))
+   elseif type(func) ~= "function" and type(func) ~= "string" then
+      err = format("func expected to be function or string, got %s", type(func))
+   elseif type(func) == "string" and func == "AlterStringColors" then
+      err = "setting func so I'll call myself would be very bad, Carol!"
+   -- Check if it's a Prism function, and one we'd want to use for this purpose.
+   elseif type(func) == "string" and not Prism[func] or func == "Gradient" or func == "RGBtoHSV" or func == "HSVtoRGB" then
+      err = format("unknown function for operation, '%s'", func)
+   elseif type(modifier) ~= "number" then
+      err = format("modifier expected to be number, got %s", type(modifier))
+   elseif operation == TYPE_ADD and (modifier < -1 or modifier > 1) then
+      err = "additive operation modifier expected to be within [-1,1]"
+   end
+
+   if err then error(format("Usage: Prism:AlterStringColors(str, r, g, b, func, modifier[, operation]: %s", err), 2) end
+
+   local escaped_indices = {}
+   local escape_index = nil
+
+   -- First, see if anything matches what we replace escapes with.
+   while true do
+      local index = str:find("|¨", escape_index)
+      if index then
+	 tinsert(escaped_indices, index)
+	 escape_index = index + 1
+      else break end
+   end
+
+   -- Replace any escapes so that they will not interfere with out pattern matching.
+   str = str:gsub("||", "|-")
+
+   -- Find a delimiter we can use for later string substitutions
+   local delimiter = "="
+   while true do
+      if str:match(delimiter .. "[rc]" .. delimiter) then delimiter = delimiter .. "="
+      else break end
+   end
+
+   -- Capture any encoded colors.
+   local captures = {}
+   for a,cr,cg,cb in str:gmatch("|c(%x%x)(%x%x)(%x%x)(%x%x)") do
+      a = tonumber("0x" .. a)/255
+      cr = tonumber("0x" .. cr)/255
+      cg = tonumber("0x" .. cg)/255
+      cb = tonumber("0x" .. cb)/255
+      tinsert(captures, {a=a,r=cr,g=cg,b=cb})
+   end
+
+   -- Prepare the string for substition.
+   str = str:gsub("|c%x%x%x%x%x%x%x%x", delimiter .. "c" .. delimiter):gsub("|r", delimiter .. "r" .. delimiter)
+
+   -- Replace any returns
+   if type(func) == "string" then func = Prism[func] end
+   local dr,dg,db = func(self, r, g, b, modifier, operation)
+   local default_color = format("|cff%02x%02x%02x", dr, dg, db)
+   str = str:gsub(delimiter.."r"..delimiter, default_color)
+
+   -- Iterate over the captured colors and perform substitution.
+   for i,v in ipairs(captures) do
+      local rr,rg,rb = func(self, v.r, v.g, v.b, modifier, operation)
+      local cstring = format("|c%02x%02x%02x%02x", v.a*255, rr*255, rg*255, rb*255)
+      str = str:gsub(delimiter.."c"..delimiter, cstring, 1)
+   end
+
+   -- Restore escapes.
+   str = str:gsub("|¨", "||")
+
+   -- Restore escapes that weren't escapes.
+   for i,v in ipairs(escaped_indices) do
+      str = str:sub(1, v) .. "-" .. str:sub(v+2)
+   end
+
+   -- If the start of the string does not set a color, set it to the default.
+   if not str:match("^|c%x%x%x%x%x%x%x%x") then str = default_color .. str end
+
+   -- If the string ends with setting a color, chop it off.
+   if str:match("|c%x%x%x%x%x%x%x%x$") then str = str:sub(1, str:len() - 10) end
+
+   -- Finally, add a return/reset/whateverthe|rmeans at the end.
+   str = str.."|r"
+
+   -- We should be done. Return the string.
+   return str
+end
